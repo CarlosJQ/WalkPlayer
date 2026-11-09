@@ -557,3 +557,50 @@ select:focus-visible,
 /* En modo lectura, ocultamos el disco giratorio para dar espacio al texto. */
 body.reading-mode .artwork { display: none; }
 body.reading-mode .now-playing { gap: 8px; }
+
+/* ---- v5: avance en la biblioteca, marcas y espacio usado ---- */
+.extra-controls { gap: 12px; flex-wrap: wrap; }
+
+.mark-btn {
+    background: var(--surface-color);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.mark-btn:active { transform: scale(0.96); }
+.mark-btn.flash { background: rgba(251, 191, 36, 0.25); }
+
+.sentence.marked { text-decoration: underline; text-decoration-color: #fbbf24; text-underline-offset: 3px; }
+
+.marks-section {
+    background: var(--surface-color);
+    border: 1px solid var(--surface-border);
+    border-radius: 16px;
+    padding: 12px 16px;
+}
+.marks-section summary { cursor: pointer; font-weight: 600; color: #fbbf24; }
+.marks-list { list-style: none; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; }
+.marks-list li { display: flex; gap: 8px; align-items: flex-start; }
+.mark-jump {
+    flex: 1; text-align: left; background: none; border: none; color: var(--text-primary);
+    font-size: 0.92rem; line-height: 1.4; cursor: pointer; padding: 0;
+}
+.mark-time { color: var(--text-secondary); font-size: 0.8rem; margin-right: 6px; }
+.mark-delete { background: none; border: none; color: var(--text-secondary); font-size: 1.1rem; cursor: pointer; }
+.copy-marks-btn {
+    width: 100%; padding: 10px; border-radius: 12px; border: 1px solid var(--surface-border);
+    background: rgba(251, 191, 36, 0.15); color: var(--text-primary); font-weight: 600; cursor: pointer;
+}
+
+.item-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.item-progress { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+.item-progress.done { color: var(--accent-color); }
+.item-bar { height: 3px; border-radius: 2px; background: var(--surface-border); margin-top: 4px; overflow: hidden; }
+.item-bar > span { display: block; height: 100%; background: var(--primary-color); }
+.item-bar.done > span { background: var(--accent-color); }
+
+.storage-info { font-size: 0.75rem; font-weight: 400; color: var(--text-secondary); margin-left: 6px; }

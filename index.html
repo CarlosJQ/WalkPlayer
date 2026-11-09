@@ -9,7 +9,7 @@
     <title>Lector</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
     <main class="app-container">
@@ -48,23 +48,36 @@
             <label class="speed-control" for="speed-select"><span aria-hidden="true">◴</span><span class="sr-only">Velocidad</span>
                 <select id="speed-select" aria-label="Velocidad de reproducción">
                     <option value="0.8">0.8x</option>
+                    <option value="0.9">0.9x</option>
                     <option value="1" selected>1.0x</option>
+                    <option value="1.1">1.1x</option>
+                    <option value="1.15">1.15x</option>
+                    <option value="1.2">1.2x</option>
                     <option value="1.25">1.25x</option>
+                    <option value="1.35">1.35x</option>
                     <option value="1.5">1.5x</option>
+                    <option value="1.75">1.75x</option>
                     <option value="2">2.0x</option>
                 </select>
             </label>
+            <button id="btn-mark" class="mark-btn" type="button" hidden title="Marcar la frase que está sonando" aria-label="Marcar la frase que está sonando">☆ Marcar</button>
         </section>
+
+        <details class="marks-section" id="marks-section" hidden>
+            <summary><span id="marks-title">Frases marcadas (0)</span></summary>
+            <ul id="marks-list" class="marks-list"></ul>
+            <button id="btn-copy-marks" class="copy-marks-btn" type="button">Copiar frases marcadas</button>
+        </details>
 
         <section class="playlist-section" aria-labelledby="library-title">
             <div class="playlist-header">
-                <h3 id="library-title">Mi Biblioteca</h3>
+                <h3 id="library-title">Mi Biblioteca <span id="storage-info" class="storage-info"></span></h3>
                 <button id="btn-clear-db" class="clear-btn" type="button" title="Borrar toda la biblioteca" aria-label="Borrar toda la biblioteca">⌫</button>
             </div>
             <ul id="playlist" class="playlist"><li class="empty-state">No hay nada aún. Toca 'Importar' para empezar.</li></ul>
         </section>
         <audio id="audio-player" preload="metadata"></audio>
     </main>
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
 </body>
 </html>
