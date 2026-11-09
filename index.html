@@ -9,7 +9,7 @@
     <title>Lector</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
     <main class="app-container">
@@ -72,12 +72,15 @@
         <section class="playlist-section" aria-labelledby="library-title">
             <div class="playlist-header">
                 <h3 id="library-title">Mi Biblioteca <span id="storage-info" class="storage-info"></span></h3>
-                <button id="btn-clear-db" class="clear-btn" type="button" title="Borrar toda la biblioteca" aria-label="Borrar toda la biblioteca">⌫</button>
+                <div class="playlist-actions">
+                    <button id="btn-sort" class="sort-btn" type="button" title="Cambiar el orden de la lista" aria-pressed="false">⇅ Ordenar</button>
+                    <button id="btn-clear-db" class="clear-btn" type="button" title="Borrar toda la biblioteca" aria-label="Borrar toda la biblioteca">⌫</button>
+                </div>
             </div>
             <ul id="playlist" class="playlist"><li class="empty-state">No hay nada aún. Toca 'Importar' para empezar.</li></ul>
         </section>
         <audio id="audio-player" preload="metadata"></audio>
     </main>
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>

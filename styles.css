@@ -604,3 +604,19 @@ body.reading-mode .now-playing { gap: 8px; }
 .item-bar.done > span { background: var(--accent-color); }
 
 .storage-info { font-size: 0.75rem; font-weight: 400; color: var(--text-secondary); margin-left: 6px; }
+
+/* ---- v6: ordenar la biblioteca ---- */
+.playlist-actions { display: flex; align-items: center; gap: 4px; }
+.sort-btn {
+    background: transparent; border: 1px solid var(--surface-border); color: var(--text-secondary);
+    border-radius: 14px; padding: 4px 10px; font-size: 0.85rem; cursor: pointer;
+}
+.sort-btn[aria-pressed="true"] { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+.move-btns { display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; }
+.move-btn {
+    width: 36px; height: 26px; border: 1px solid var(--surface-border); border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05); color: var(--text-primary); font-size: 0.8rem; cursor: pointer;
+}
+.move-btn:disabled { opacity: 0.25; cursor: default; }
+.playlist.sorting .playlist-item { padding-top: 6px; padding-bottom: 6px; }
+.playlist-item.moved { background: rgba(59, 130, 246, 0.18); }

@@ -16,6 +16,8 @@
 
 - **Versión 5 (nov 2026):** posición recordada por cada audio, avance visible en la biblioteca («12:30 de 32:29», «✓ Escuchado»), reemplazo de lecturas regeneradas con el mismo título (conserva marcas), velocidades finas (0.8x–2.0x), ±15 s en pantalla bloqueada (sin pista anterior/siguiente), `setPositionState` para la barra de la pantalla bloqueada, almacenamiento persistente con espacio usado, y **frases marcadas** con botón para copiarlas. Al terminar un audio sigue con el siguiente no escuchado y se detiene al final.
 
+- **Versión 6 (nov 2026):** botón «⇅ Ordenar» en la biblioteca: flechas ▲▼ para cambiar el orden, que se guarda en el teléfono y es el orden en que se reproduce.
+
 ## Tareas Pendientes (TODO)
 - [x] Revisión del código en `app.js` para organizar funciones.
 - [x] Validar que la interfaz sea totalmente responsiva mediante `styles.css` (Glassmorphism oscuro implementado).

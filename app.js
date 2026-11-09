@@ -2,6 +2,7 @@
  * Reúsa el motor de WalkPlayer (reproducción en segundo plano iOS, Media Session,
  * memoria de posición) y añade lecturas con resaltado y doble-toque para saltar.
  *
+ * v6: la biblioteca se puede reordenar («⇅ Ordenar»); ese orden es el de reproducción.
  * v5: posición recordada POR CADA audio, avance visible en la biblioteca,
  *     reemplazo de lecturas regeneradas, más velocidades, ±15 s en la pantalla
  *     bloqueada, almacenamiento persistente y frases marcadas para copiar. */
@@ -14,12 +15,15 @@ const DOUBLE_TAP_MS = 350;
 const POS_KEY = 'lector_pos';      // { [id]: { t: segundos, d: duración } }
 const DONE_MARGIN = 2;             // a menos de 2 s del final = escuchado
 const MARK_GRACE = 1.5;            // si la frase recién empezó, se marca la anterior
+const ORDER_KEY = 'lector_order';  // [id, id, ...] orden elegido para la biblioteca
 
 let db;
 let tracks = [];
 let currentTrackIndex = -1;
 let currentObjectURL = null;
 let lastSavedPosition = -1;
+let sortMode = false;
+let lastMovedId = null;
 
 // Estado de la lectura activa.
 let currentSentences = null;   // [{i, t, s, e}] o null si es un MP3 normal
@@ -52,6 +56,7 @@ const marksTitleEl = document.getElementById('marks-title');
 const marksListEl = document.getElementById('marks-list');
 const copyMarksBtn = document.getElementById('btn-copy-marks');
 const storageInfoEl = document.getElementById('storage-info');
+const sortBtn = document.getElementById('btn-sort');
 
 const icons = { play: '▶', pause: 'Ⅱ' };
 
@@ -136,6 +141,46 @@ function resumeTimeFor(track) {
     return pos.t || 0;
 }
 
+/* ------------------------ Orden de la biblioteca ----------------------- */
+function loadOrder() {
+    try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch (_) { return []; }
+}
+
+function saveOrder() {
+    try { localStorage.setItem(ORDER_KEY, JSON.stringify(tracks.map((t) => t.id))); } catch (_) { /* sin espacio */ }
+}
+
+/* Aplica el orden guardado; lo nuevo (sin posición) va al final, en orden de llegada. */
+function sortByUserOrder(list) {
+    const rank = new Map(loadOrder().map((id, i) => [id, i]));
+    return list.slice().sort((a, b) => {
+        const ra = rank.has(a.id) ? rank.get(a.id) : Infinity;
+        const rb = rank.has(b.id) ? rank.get(b.id) : Infinity;
+        return ra === rb ? a.id - b.id : ra - rb;
+    });
+}
+
+function moveTrack(index, delta) {
+    const target = index + delta;
+    if (target < 0 || target >= tracks.length) return;
+    const activeId = currentTrack()?.id;
+    const [moved] = tracks.splice(index, 1);
+    tracks.splice(target, 0, moved);
+    currentTrackIndex = activeId ? tracks.findIndex((t) => t.id === activeId) : -1;
+    lastMovedId = moved.id;
+    saveOrder();
+    renderPlaylist();
+}
+
+function setSortMode(on) {
+    sortMode = on;
+    lastMovedId = null;
+    sortBtn.setAttribute('aria-pressed', String(on));
+    sortBtn.textContent = on ? '✓ Listo' : '⇅ Ordenar';
+    playlistEl.classList.toggle('sorting', on);
+    renderPlaylist();
+}
+
 /* ------------------------------ Utilidades ---------------------------- */
 function formatTime(seconds) {
     if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
@@ -169,6 +214,7 @@ function updateControls() {
     const hasTracks = tracks.length > 0;
     [playPauseBtn, prevBtn, nextBtn, rewindBtn, forwardBtn].forEach((b) => { b.disabled = !hasTracks; });
     clearDbBtn.disabled = !hasTracks;
+    sortBtn.disabled = tracks.length < 2;
 }
 
 function applySpeed() {
@@ -626,22 +672,46 @@ function renderPlaylist() {
         fillProgress(track, progress, bar);
         selectButton.append(icon, textBox);
 
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'delete-track-btn';
-        deleteButton.type = 'button';
-        deleteButton.textContent = '×';
-        deleteButton.title = `Eliminar ${getTrackTitle(track)}`;
-        deleteButton.setAttribute('aria-label', `Eliminar ${getTrackTitle(track)}`);
-        deleteButton.addEventListener('click', () => deleteTrack(track));
-
-        item.append(selectButton, deleteButton);
+        if (sortMode) {
+            // En modo ordenar: flechas para subir/bajar (y sin borrar por accidente).
+            item.classList.toggle('moved', track.id === lastMovedId);
+            const moveBox = document.createElement('span');
+            moveBox.className = 'move-btns';
+            const up = document.createElement('button');
+            up.type = 'button';
+            up.className = 'move-btn';
+            up.textContent = '▲';
+            up.disabled = index === 0;
+            up.setAttribute('aria-label', `Subir ${getTrackTitle(track)}`);
+            up.addEventListener('click', () => moveTrack(index, -1));
+            const down = document.createElement('button');
+            down.type = 'button';
+            down.className = 'move-btn';
+            down.textContent = '▼';
+            down.disabled = index === tracks.length - 1;
+            down.setAttribute('aria-label', `Bajar ${getTrackTitle(track)}`);
+            down.addEventListener('click', () => moveTrack(index, 1));
+            moveBox.append(up, down);
+            selectButton.disabled = true;
+            item.append(selectButton, moveBox);
+        } else {
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-track-btn';
+            deleteButton.type = 'button';
+            deleteButton.textContent = '×';
+            deleteButton.title = `Eliminar ${getTrackTitle(track)}`;
+            deleteButton.setAttribute('aria-label', `Eliminar ${getTrackTitle(track)}`);
+            deleteButton.addEventListener('click', () => deleteTrack(track));
+            item.append(selectButton, deleteButton);
+        }
         playlistEl.append(item);
     });
 }
 
 async function refreshLibrary() {
     const activeId = currentTrack()?.id;
-    tracks = await getAllItemsFromDB();
+    tracks = sortByUserOrder(await getAllItemsFromDB());
+    saveOrder();
     currentTrackIndex = activeId ? tracks.findIndex((t) => t.id === activeId) : -1;
     renderPlaylist();
     updateStorageInfo();
@@ -667,7 +737,8 @@ async function deleteTrack(track) {
 }
 
 async function loadInitialLibrary() {
-    tracks = await getAllItemsFromDB();
+    tracks = sortByUserOrder(await getAllItemsFromDB());
+    saveOrder();
     const lastTrackId = Number(localStorage.getItem('lector_lastTrackId'));
     // Migración desde la versión anterior (una sola posición guardada).
     const oldTime = Number(localStorage.getItem('lector_lastTime'));
@@ -827,6 +898,7 @@ rewindBtn.addEventListener('click', () => skipTime(-15));
 forwardBtn.addEventListener('click', () => skipTime(15));
 markBtn.addEventListener('click', markCurrentSentence);
 copyMarksBtn.addEventListener('click', copyMarks);
+sortBtn.addEventListener('click', () => setSortMode(!sortMode));
 
 speedSelect.addEventListener('change', (event) => {
     applySpeed();
@@ -884,6 +956,7 @@ clearDbBtn.addEventListener('click', async () => {
         resetPlayer();
         positions = {};
         savePositions();
+        localStorage.removeItem(ORDER_KEY);
         localStorage.removeItem('lector_lastTrackId');
         renderPlaylist();
         updateStorageInfo();
